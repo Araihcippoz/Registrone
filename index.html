@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Registro Lavoro</title>
+  <!-- Google Fonts & FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    :root {
+      --bg-main: #f5f2eb;
+      --card-bg: #ffffff;
+      --card-border: #e2dacd;
+      --text-main: #1f2022;
+      --text-muted: #6e6b63;
+      --primary: #4a5d4e;
+      --primary-hover: #3a4a3e;
+      --primary-light: #e8efe9;
+      --accent: #2e7d32;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --radius: 16px;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 12px;
+    }
+
+    @media (min-width: 768px) {
+      body { padding: 24px; }
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Login Screen Overlay */
+    #auth-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg-main);
+      display: flex; justify-content: center; align-items: center; z-index: 2000;
+      padding: 16px;
+    }
+    .auth-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 32px 24px; border-radius: var(--radius);
+      max-width: 380px; width: 100%; text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    /* Header Navigation */
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    @media (min-width: 768px) {
+      header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+      }
+    }
+
+    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: var(--primary);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; color: #ffffff;
+      flex-shrink: 0;
+    }
+
+    h1 { font-size: 1.3rem; font-weight: 800; color: var(--text-main); }
+
+    .nav-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      background: var(--bg-main);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .nav-tabs { display: flex; width: auto; gap: 6px; }
+    }
+
+    .tab-btn {
+      padding: 10px 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.78rem;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-align: center;
+    }
+
+    @media (min-width: 768px) {
+      .tab-btn { flex-direction: row; padding: 10px 18px; font-size: 0.88rem; gap: 8px; }
+    }
+
+    .tab-btn:hover { color: var(--text-main); }
+    .tab-btn.active { background: var(--primary); color: #ffffff; }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+
+    .chip-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .chip-btn.active {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Tab Content Visibility */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Dashboard Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    @media (min-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 14px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-info h3 { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; font-weight: 700; }
+    .stat-info p { font-size: 1.25rem; font-weight: 800; color: var(--text-main); }
+
+    .section-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    @media (min-width: 1024px) { .section-grid { grid-template-columns: 2fr 1fr; gap: 22px; } }
+
+    .grid-5050 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 768px) { .grid-5050 { grid-template-columns: 1fr 1fr; } }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 18px;
+      border-radius: var(--radius);
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+    @media (min-width: 768px) { .card { padding: 24px; } }
+
+    .card-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
+
+    /* Forms */
+    .form-group { margin-bottom: 14px; text-align: left; }
+    label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      background: #faf8f5;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: var(--primary); background: #ffffff; }
+
+    /* Tables */
+    .table-responsive { overflow-x: auto; margin-top: 8px; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; min-width: 320px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--card-border); font-size: 0.85rem; }
+    th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
+
+    .btn-action {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-edit { background: var(--primary-light); color: var(--primary); }
+    .btn-delete { background: #fee2e2; color: var(--danger); }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.9rem;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    /* Calendar Mobile Optimized */
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    @media (min-width: 768px) { .calendar-grid { gap: 8px; } }
+
+    .cal-day-head { text-align: center; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; padding: 4px; }
+
+    .cal-day {
+      background: #faf8f5;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      aspect-ratio: 1 / 1;
+      padding: 4px;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      position: relative;
+    }
+
+    @media (min-width: 768px) {
+      .cal-day { aspect-ratio: auto; min-height: 90px; justify-content: flex-start; padding: 8px; }
+    }
+
+    .cal-day.has-event { border-color: var(--primary); background: #ffffff; }
+
+    /* Minimal Icon Badge for Mobile */
+    .cal-icon-badge {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: #ffffff;
+      margin-top: 2px;
+    }
+
+    .cal-icon-badge.pending { background: var(--warning); }
+    .cal-icon-badge.completed { background: var(--accent); }
+
+    .cal-details-desktop { display: none; }
+    @media (min-width: 768px) {
+      .cal-icon-badge { display: none; }
+      .cal-details-desktop {
+        display: block;
+        width: 100%;
+        margin-top: 4px;
+        padding: 4px;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-align: center;
+      }
+      .cal-details-desktop.pending { background: #fef3c7; color: #92400e; }
+      .cal-details-desktop.completed { background: #dcfce7; color: #166534; }
+    }
+
+    /* Shift Selector */
+    .shift-selector-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 6px;
+      background: #faf8f5;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 14px;
+    }
+    .shift-select-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .shift-select-item.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      display: none; justify-content: center; align-items: center; z-index: 1000;
+      padding: 16px;
+    }
+    .modal {
+      background: var(--card-bg); padding: 22px; border-radius: var(--radius);
+      max-width: 420px; width: 100%; border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
+    }
+    .modal-btns { display: flex; gap: 10px; margin-top: 18px; justify-content: flex-end; }
+
+    .goal-card, .expense-card {
+      background: #faf8f5;
+      border: 1px solid var(--card-border);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .progress-track { background: var(--card-border); height: 8px; border-radius: 4px; overflow: hidden; margin: 6px 0; }
+    .progress-fill { height: 100%; background: var(--primary); }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Login Google -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <div class="logo-icon" style="margin: 0 auto 14px;"><i class="fa-solid fa-lock"></i></div>
+      <h2 style="font-size:1.2rem; margin-bottom:6px; color:var(--text-main);">Registro Lavoro</h2>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:20px;">Accedi per sincronizzare i tuoi dati in tempo reale.</p>
+      
+      <button class="btn-primary" style="display:flex; align-items:center; justify-content:center; gap:8px;" onclick="window.loginWithGoogle()">
+        <i class="fa-brands fa-google"></i> Accedi con Google
+      </button>
+    </div>
+  </div>
+
+  <div class="container" id="main-app" style="display:none;">
+    <!-- Main Header -->
+    <header>
+      <div class="logo-area">
+        <div class="logo-icon"><i class="fa-solid fa-calendar-check"></i></div>
+        <div>
+          <h1>Registro Lavoro</h1>
+          <p style="font-size:0.75rem; color:var(--text-muted);" id="user-display">Account Sincronizzato</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; width: 100%; max-width: 450px;">
+        <div class="nav-tabs">
+          <button class="tab-btn active" onclick="switchTab('tab-cal', this)"><i class="fa-solid fa-calendar-days"></i> Calendario</button>
+          <button class="tab-btn" onclick="switchTab('tab-pay', this)"><i class="fa-solid fa-wallet"></i> Incassi</button>
+          <button class="tab-btn" onclick="switchTab('tab-sav', this)"><i class="fa-solid fa-piggy-bank"></i> Gestione Finanze</button>
+        </div>
+        <button class="btn-action btn-delete" title="Esci" onclick="window.logoutGoogle()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </header>
+
+    <!-- TAB 1: CALENDARIO -->
+    <div id="tab-cal" class="tab-content active">
+      <div class="section-grid">
+        <div class="card">
+          <div class="calendar-header">
+            <h2 id="cal-month-title" style="font-size:1.05rem;">Agosto 2026</h2>
+            <div>
+              <button class="btn-action btn-edit" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+              <button class="btn-action btn-edit" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+
+        <div class="card" id="shift-form-card">
+          <div class="card-title">
+            <span id="form-shift-title"><i class="fa-solid fa-plus-circle"></i> Turno</span>
+            <button class="btn-action btn-edit" style="display:none;" id="btn-cancel-edit" onclick="resetShiftForm()"><i class="fa-solid fa-xmark"></i> Annulla</button>
+          </div>
+          <form id="shift-form">
+            <input type="hidden" id="shift-id">
+            <div class="form-group">
+              <label>Data Turno</label>
+              <input type="date" id="shift-date" required min="2026-08-01">
+            </div>
+            <div class="form-group">
+              <label>Datore / Lavoro</label>
+              <input type="text" id="shift-job" value="Betti" required>
+            </div>
+            <div class="grid-5050" style="gap:10px;">
+              <div class="form-group">
+                <label>Ore Lavorate</label>
+                <input type="number" id="shift-hours" value="6" step="0.5" required oninput="autoCalcDue()">
+              </div>
+              <div class="form-group">
+                <label>Paga Oraria (€)</label>
+                <input type="number" id="shift-rate" value="10" step="0.5" oninput="autoCalcDue()">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Importo Dovuto (€)</label>
+              <input type="number" id="shift-due" value="60" required>
+            </div>
+            <div class="form-group">
+              <label>Stato Turno</label>
+              <select id="shift-completed">
+                <option value="false">⏳ Da Fare (Programmato)</option>
+                <option value="true">✅ Fatto (Completato)</option>
+              </select>
+            </div>
+
+            <div style="display:flex; gap:8px; margin-top:14px;">
+              <button type="submit" class="btn-primary" id="btn-save-shift">Salva Turno</button>
+              <button type="button" class="btn-action btn-delete" id="btn-delete-shift" style="display:none; width:45%; justify-content:center;" onclick="confirmDeleteFromForm()">Elimina</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: INCASSI E TURNI PAGATI -->
+    <div id="tab-pay" class="tab-content">
+      <div class="filter-bar">
+        <button class="chip-btn active" onclick="setMonthFilter('ALL', this)">Tutti i Mesi</button>
+        <button class="chip-btn" onclick="setMonthFilter('08', this)">Agosto</button>
+        <button class="chip-btn" onclick="setMonthFilter('09', this)">Settembre</button>
+        <button class="chip-btn" onclick="setMonthFilter('10', this)">Ottobre</button>
+        <button class="chip-btn" onclick="setMonthFilter('11', this)">Novembre</button>
+        <button class="chip-btn" onclick="setMonthFilter('12', this)">Dicembre</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-info"><h3>Dovuto Totale</h3><p id="stat-due">€0</p></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info"><h3>Turni Fatti</h3><p id="stat-completed-val">€0</p></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info"><h3>Incassato</h3><p id="stat-paid">€0</p></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info"><h3>Da Incassare</h3><p id="stat-pending">€0</p></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>Registra Incasso</span>
+          <span style="font-size:0.8rem; color:var(--primary); font-weight:700;" id="batch-selected-sum">Selezionati: 0 (€0.00)</span>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
+          Seleziona i turni pagati insieme per registrarne l'incasso:
+        </p>
+
+        <div class="shift-selector-grid" id="unpaid-shifts-selector"></div>
+
+        <form id="pay-batch-form" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items:end;">
+          <div class="form-group"><label>Data Incasso</label><input type="date" id="pay-batch-date" required></div>
+          <div class="form-group"><label>Lavoro / Datore</label><input type="text" id="pay-batch-job" value="Betti" required></div>
+          <div class="form-group"><label>Importo (€)</label><input type="number" id="pay-batch-amount" required step="0.01"></div>
+          <div style="margin-bottom:14px;">
+            <button type="submit" class="btn-primary" style="padding:10px;"><i class="fa-solid fa-check"></i> Conferma</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Storico Incassi</div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Lavoro</th>
+                <th>Importo</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="payments-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: PROIEZIONI E RISPARMI -->
+    <div id="tab-sav" class="tab-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-info"><h3>Accantonato</h3><p id="stat-saved-total" style="color:var(--primary);">€0</p></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info"><h3>Totale Spese</h3><p id="stat-expenses-total" style="color:var(--danger);">€0</p></div>
+        </div>
+      </div>
+
+      <div class="grid-5050">
+        <!-- Accantonamenti -->
+        <div class="card">
+          <div class="card-title">
+            <span>Soldi Messi da Parte</span>
+            <button class="btn-action btn-edit" onclick="showAddSavingsModal()"><i class="fa-solid fa-plus"></i> Aggiungi</button>
+          </div>
+          <div id="savings-list"></div>
+        </div>
+
+        <!-- Spese -->
+        <div class="card">
+          <div class="card-title">
+            <span>Spese Effettuate</span>
+            <button class="btn-action btn-edit" onclick="showAddExpenseModal()"><i class="fa-solid fa-plus"></i> Aggiungi</button>
+          </div>
+          <div id="expenses-list"></div>
+        </div>
+      </div>
+
+      <!-- Obiettivi Risparmio -->
+      <div class="card">
+        <div class="card-title">
+          <span>Obiettivi di Risparmio</span>
+          <button class="btn-action btn-edit" onclick="showAddGoalModal()"><i class="fa-solid fa-plus"></i> Nuovo</button>
+        </div>
+        <div id="goals-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Dettaglio Turno Mobile -->
+  <div class="modal-overlay" id="shift-detail-modal">
+    <div class="modal">
+      <h3 style="margin-bottom:12px; font-size:1.1rem;" id="modal-shift-date">Dettagli Turno</h3>
+      <div id="modal-shift-content" style="text-align:left; font-size:0.9rem; line-height:1.6; margin-bottom:16px;"></div>
+      <div class="modal-btns">
+        <button class="btn-action btn-edit" style="padding:8px 16px;" id="modal-btn-edit">Modifica</button>
+        <button class="btn-action btn-delete" style="padding:8px 16px;" id="modal-btn-close" onclick="closeModal('shift-detail-modal')">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Aggiungi Risparmio -->
+  <div class="modal-overlay" id="savings-modal">
+    <div class="modal">
+      <h3 style="margin-bottom:12px; font-size:1.1rem;">Aggiungi Risparmio</h3>
+      <form id="savings-form">
+        <div class="form-group"><label>Descrizione / Fondo</label><input type="text" id="sav-title" placeholder="Es. Fondo Emergenza" required></div>
+        <div class="form-group"><label>Importo (€)</label><input type="number" id="sav-amount" required step="0.01"></div>
+        <div class="form-group"><label>Data</label><input type="date" id="sav-date" required></div>
+        <div class="modal-btns">
+          <button type="submit" class="btn-primary" style="width:auto;">Salva</button>
+          <button type="button" class="btn-action btn-delete" onclick="closeModal('savings-modal')">Annulla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Aggiungi Spesa -->
+  <div class="modal-overlay" id="expense-modal">
+    <div class="modal">
+      <h3 style="margin-bottom:12px; font-size:1.1rem;">Aggiungi Spesa</h3>
+      <form id="expense-form">
+        <div class="form-group"><label>Descrizione</label><input type="text" id="exp-title" placeholder="Es. Spesa Alimentari" required></div>
+        <div class="form-group"><label>Categoria</label><input type="text" id="exp-category" placeholder="Es. Cibo, Svago, Trasporti" required></div>
+        <div class="form-group"><label>Importo (€)</label><input type="number" id="exp-amount" required step="0.01"></div>
+        <div class="form-group"><label>Data</label><input type="date" id="exp-date" required></div>
+        <div class="modal-btns">
+          <button type="submit" class="btn-primary" style="width:auto;">Salva</button>
+          <button type="button" class="btn-action btn-delete" onclick="closeModal('expense-modal')">Annulla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Conferma Eliminazione -->
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal" style="text-align:center;">
+      <div style="font-size: 2rem; color: var(--danger); margin-bottom: 8px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h3>Sei sicuro/a di voler eliminare?</h3>
+      <div class="modal-btns" style="justify-conte
+nt:center;">
+        <button class="btn-action btn-delete" style="padding: 10px 20px;" onclick="confirmDelete()">Elimina</button>
+        <button class="btn-action btn-edit" style="padding: 10px 20px;" onclick="closeModal('delete-modal')">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase v10 SDK Module -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // ⚠️ INCOLLA QUI LA TUA CONFIGURAZIONE DI FIREBASE
+    const firebaseConfig = {
+      apiKey: "AIzaSyB8Y70oOsnOKOJpQR4PONI6iTlNEML7aoc",
+      authDomain: "registrolavoro-403d7.firebaseapp.com",
+      projectId: "registrolavoro-403d7",
+      storageBucket: "registrolavoro-403d7.firebasestorage.app",
+      messagingSenderId: "473939538341",
+      appId: "1:473939538341:web:d36182231ca84f0f82f84c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+    let unsubscribeSnapshot = null;
+
+    window.loginWithGoogle = function() {
+      signInWithPopup(auth, provider).catch(err => alert("Errore di accesso: " + err.message));
+    };
+
+    window.logoutGoogle = function() {
+      signOut(auth);
+    };
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('user-display').innerText = user.email;
+
+        const userDocRef = doc(db, "users", user.uid);
+        unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            window.shifts = data.shifts || [];
+            window.payments = data.payments || [];
+            window.goals = data.goals || [];
+            window.savings = data.savings || [];
+            window.expenses = data.expenses || [];
+          } else {
+            window.shifts = window.generateInitialShifts();
+            window.payments = [];
+            window.goals = [];
+            window.savings = [];
+            window.expenses = [];
+            window.saveDataToCloud();
+          }
+          renderCalendar();
+          updatePaymentsAndCharts();
+          renderFinances();
+        });
+      } else {
+        currentUser = null;
+        if(unsubscribeSnapshot) unsubscribeSnapshot();
+        document.getElementById('auth-screen').style.display = 'flex';
+        document.getElementById('main-app').style.display = 'none';
+      }
+    });
+
+    window.saveDataToCloud = async function() {
+      if (!currentUser) return;
+      try {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        await setDoc(userDocRef, {
+          shifts: window.shifts,
+          payments: window.payments,
+          goals: window.goals,
+          savings: window.savings,
+          expenses: window.expenses,
+          updatedAt: new Date().toISOString()
+        });
+      } catch (err) {
+        console.error("Errore nel salvataggio su Firebase:", err);
+      }
+    };
+  </script>
+
+  <!-- Application Logic -->
+  <script>
+    window.generateInitialShifts = function() {
+      let baseShifts = [
+        { id: 1, date: '2026-08-03', job: 'Betti', hours: 6, due: 60, completed: true, isPaid: true },
+        { id: 2, date: '2026-08-06', job: 'Betti', hours: 6, due: 60, completed: true, isPaid: true },
+        { id: 3, date: '2026-08-11', job: 'Betti', hours: 6, due: 60, completed: true, isPaid: true },
+        { id: 4, date: '2026-08-13', job: 'Betti', hours: 6, due: 60, completed: true, isPaid: true },
+        { id: 5, date: '2026-08-17', job: 'Betti', hours: 6, due: 60, completed: true, isPaid: false }
+      ];
+      return baseShifts;
+    };
+
+    window.shifts = [];
+    window.payments = [];
+    window.goals = [];
+    window.savings = [];
+    window.expenses = [];
+
+    let currentYear = 2026;
+    let currentMonth = 7;
+    let activeMonthFilter = 'ALL';
+    let selectedShiftIdsForBatch = [];
+    let deleteCallback = null;
+
+    const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+
+    function triggerSave() {
+      if (window.saveDataToCloud) window.saveDataToCloud();
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+
+      if(tabId === 'tab-pay') updatePaymentsAndCharts();
+      if(tabId === 'tab-sav') renderFinances();
+    }
+
+    function autoCalcDue() {
+      let h = parseFloat(document.getElementById('shift-hours').value) || 0;
+      let r = parseFloat(document.getElementById('shift-rate').value) || 10;
+      document.getElementById('shift-due').value = h * r;
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+      document.getElementById('cal-month-title').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+
+      const daysHeader = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
+      daysHeader.forEach(d => grid.innerHTML += `<div class="cal-day-head">${d}</div>`);
+
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1;
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      for (let i = 0; i < adjustedFirstDay; i++) {
+        grid.innerHTML += `<div class="cal-day" style="opacity:0.2"></div>`;
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const monthStr = String(currentMonth + 1).padStart(2, '0');
+        const dayStr = String(d).padStart(2, '0');
+        const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
+
+        const dayShifts = window.shifts.filter(s => s.date === dateStr);
+        const hasEvent = dayShifts.length > 0;
+
+        let dayHtml = `<div class="cal-day ${hasEvent ? 'has-event' : ''}" onclick="onDayClick('${dateStr}')">
+                        <strong>${d}</strong>`;
+        
+        if (hasEvent) {
+          const firstShift = dayShifts[0];
+          const statusClass = firstShift.completed ? 'completed' : 'pending';
+          const icon = firstShift.completed ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-clock"></i>';
+          
+          dayHtml += `<div class="cal-icon-badge ${statusClass}">${icon}</div>`;
+          dayHtml += `<div class="cal-details-desktop ${statusClass}">${firstShift.job} (${firstShift.hours}h)</div>`;
+        }
+
+        dayHtml += `</div>`;
+        grid.innerHTML += dayHtml;
+      }
+    }
+
+    function onDayClick(dateStr) {
+      const dayShifts = window.shifts.filter(s => s.date === dateStr);
+      
+      if (dayShifts.length > 0) {
+        // Su mobile apre un modale con le specifiche del turno
+        const s = dayShifts[0];
+        document.getElementById('modal-shift-date').innerText = `Turno del ${s.date}`;
+        document.getElementById('modal-shift-content').innerHTML = `
+          <strong>Lavoro/Datore:</strong> ${s.job}<br>
+          <strong>Ore lavorate:</strong> ${s.hours} ore<br>
+          <strong>Importo dovuto:</strong> €${s.due}<br>
+          <strong>Stato:</strong> ${s.completed ? '✅ Fatto' : '⏳ Da Fare'}<br>
+          <strong>Pagamento:</strong> ${s.isPaid ? '💶 Pagato' : '❌ Non Pagato'}
+        `;
+        document.getElementById('modal-btn-edit').onclick = function() {
+          closeModal('shift-detail-modal');
+          loadShiftIntoForm(s);
+        };
+        document.getElementById('shift-detail-modal').style.display = 'flex';
+      } else {
+        resetShiftForm();
+        document.getElementById('shift-date').value = dateStr;
+        document.getElementById('form-shift-title').innerHTML = `<i class="fa-solid fa-plus-circle"></i> Nuovo Turno`;
+      }
+    }
+
+    function loadShiftIntoForm(s) {
+      document.getElementById('shift-id').value = s.id;
+      document.getElementById('shift-date').value = s.date;
+      document.getElementById('shift-job').value = s.job;
+      document.getElementById('shift-hours').value = s.hours;
+      document.getElementById('shift-due').value = s.due;
+      document.getElementById('shift-completed').value = s.completed ? "true" : "false";
+
+      document.getElementById('form-shift-title').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Modifica Turno`;
+      document.getElementById('btn-cancel-edit').style.display = 'inline-flex';
+      document.getElementById('btn-delete-shift').style.display = 'inline-flex';
+
+      document.getElementById('shift-form-card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetShiftForm() {
+      document.getElementById('shift-form').reset();
+      document.getElementById('shift-id').value = '';
+      document.getElementById('shift-rate').value = '10';
+      document.getElementById('form-shift-title').innerHTML = `<i class="fa-solid fa-plus-circle"></i> Turno`;
+      document.getElementById('btn-cancel-edit').style.display = 'none';
+      document.getElementById('btn-delete-shift').style.display = 'none';
+    }
+
+    function changeMonth(dir) {
+      currentMonth += dir;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      renderCalendar();
+    }
+
+    document.getElementById('shift-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('shift-id').value;
+      const date = document.getElementById('shift-date').value;
+      const job = document.getElementById('shift-job').value;
+      const hours = parseFloat(document.getElementById('shift-hours').value);
+      const due = parseFloat(document.getElementById('shift-due').value);
+      const completed = document.getElementById('shift-completed').value === "true";
+
+      if (id) {
+        const idx = window.shifts.findIndex(s => s.id == id);
+        window.shifts[idx] = { ...window.shifts[idx], date, job, hours, due, completed };
+      } else {
+        window.shifts.push({ id: Date.now(), date, job, hours, due, completed, isPaid: false });
+      }
+
+      triggerSave();
+      resetShiftForm();
+      renderCalendar();
+      updatePaymentsAndCharts();
+    });
+
+    function confirmDeleteFromForm() {
+      const id = document.getElementById('shift-id').value;
+      if (id) {
+        promptDelete(() => {
+          window.shifts = window.shifts.filter(s => s.id != id);
+          triggerSave();
+          resetShiftForm();
+          renderCalendar();
+          updatePaymentsAndCharts();
+        });
+      }
+    }
+
+    function setMonthFilter(month, btn) {
+      activeMonthFilter = month;
+      document.querySelectorAll('.filter-bar .chip-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updatePaymentsAndCharts();
+    }
+
+    function getFilteredShifts() {
+      return window.shifts.filter(s => {
+        if (activeMonthFilter === 'ALL') return true;
+        const m = s.date.split('-')[1];
+        return m === activeMonthFilter;
+      });
+    }
+
+    function renderUnpaidShiftSelector() {
+      const container = document.getElementById('unpaid-shifts-selector');
+      container.innerHTML = '';
+      
+      const unpaidShifts = window.shifts.filter(s => !s.isPaid).sort((a,b) => new Date(a.date) - new Date(b.date));
+
+      if (unpaidShifts.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:10px; font-size:0.85rem;">Tutti i turni risultano già pagati! 🎉</p>`;
+        return;
+      }
+
+      unpaidShifts.forEach(s => {
+        const isSelected = selectedShiftIdsForBatch.includes(s.id);
+        const statusIcon = s.completed ? '✅' : '⏳';
+
+        container.innerHTML += `
+          <div class="shift-select-item ${isSelected ? 'selected' : ''}" onclick="toggleShiftBatchSelect(${s.id})">
+            <div>
+              <strong style="font-size:0.85rem;">${s.date}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${statusIcon} ${s.job} (${s.hours}h)</div>
+            </div>
+            <div style="font-weight:800; color:var(--primary); font-size:0.9rem;">€${s.due}</div>
+          </div>`;
+      });
+    }
+
+    function toggleShiftBatchSelect(id) {
+      if (selectedShiftIdsForBatch.includes(id)) {
+        selectedShiftIdsForBatch = selectedShiftIdsForBatch.filter(x => x !== id);
+      } else {
+        selectedShiftIdsForBatch.push(id);
+      }
+      updateBatchTotal();
+      renderUnpaidShiftSelector();
+    }
+
+    function updateBatchTotal() {
+      const selectedShifts = window.shifts.filter(s => selectedShiftIdsForBatch.includes(s.id));
+      const total = selectedShifts.reduce((acc, s) => acc + s.due, 0);
+      document.getElementById('pay-batch-amount').value = total;
+      document.getElementById('batch-selected-sum').innerText = `Selezionati: ${selectedShifts.length} (€${total.toFixed(2)})`;
+    }
+
+    document.getElementById('pay-batch-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (selectedShiftIdsForBatch.length === 0) {
+        alert("Seleziona almeno un turno non pagato dall'elenco!");
+        return;
+      }
+
+      const date = document.getElementById('pay-batch-date').value;
+      const job = document.getElementById('pay-batch-job').value;
+      const amount = parseFloat(document.getElementById('pay-batch-amount').value);
+
+      window.shifts.forEach(s => {
+        if (selectedShiftIdsForBatch.includes(s.id)) {
+          s.isPaid = true;
+        }
+      });
+
+      window.payments.push({
+        id: Date.now(),
+        date, job, amount,
+        shiftIds: [...selectedShiftIdsForBatch]
+      });
+
+      selectedShiftIdsForBatch = [];
+      triggerSave();
+      document.getElementById('pay-batch-form').reset();
+      updatePaymentsAndCharts();
+      renderCalendar();
+    });
+
+    function updatePaymentsAndCharts() {
+      const filteredShifts = getFilteredShifts();
+      const filteredPayments = window.payments.filter(p => {
+        if (activeMonthFilter === 'ALL') return true;
+        const m = p.date.split('-')[1];
+        return m === activeMonthFilter;
+      });
+
+      const totalDue = filteredShifts.reduce((acc, s) => acc + s.due, 0);
+      const totalCompleted = filteredShifts.filter(s => s.completed).reduce((acc, s) => acc + s.due, 0);
+      const totalPaid = filteredPayments.reduce((acc, p) => acc + p.amount, 0);
+      const pending = totalCompleted - totalPaid;
+
+      document.getElementById('stat-due').innerText = `€${totalDue.toFixed(2)}`;
+      document.getElementById('stat-completed-val').innerText = `€${totalCompleted.toFixed(2)}`;
+      document.getElementById('stat-paid').innerText = `€${totalPaid.toFixed(2)}`;
+      document.getElementById('stat-pending').innerText = `€${pending > 0 ? pending.toFixed(2) : '0.00'}`;
+
+      const tbody = document.getElementById('payments-tbody');
+      tbody.innerHTML = '';
+      filteredPayments.forEach(p => {
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${p.date}</strong></td>
+            <td>${p.job}</td>
+            <td><strong style="color:var(--primary)">€${p.amount}</strong></td>
+            <td>
+              <button class="btn-action btn-delete" onclick="promptDelete(() => deletePayment(${p.id}))"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>`;
+      });
+
+      renderUnpaidShiftSelector();
+    }
+
+    function deletePayment(id) {
+      const pay = window.payments.find(p => p.id === id);
+      if (pay && pay.shiftIds) {
+        window.shifts.forEach(s => {
+          if (pay.shiftIds.includes(s.id)) s.isPaid = false;
+        });
+      }
+      window.payments = window.payments.filter(p => p.id !== id);
+      triggerSave();
+      updatePaymentsAndCharts();
+      renderCalendar();
+    }
+
+    /* GESTIONE FINANZE (RISPARMI E SPESE) */
+    function renderFinances() {
+      renderSavings();
+      renderExpenses();
+      renderGoals();
+    }
+
+    function renderSavings() {
+      const container = document.getElementById('savings-list');
+      container.innerHTML = '';
+      const total = window.savings.reduce((acc, s) => acc + s.amount, 0);
+      document.getElementById('stat-saved-total').innerText = `€${total.toFixed(2)}`;
+
+      if (window.savings.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem;">Nessun risparmio registrato.</p>`;
+        return;
+      }
+
+      window.savings.forEach(s => {
+        container.innerHTML += `
+          <div class="savings-card" style="display:flex; justify-content:space-between; align-items:center; background:#faf8f5; padding:8px 12px; border-radius:8px; margin-bottom:8px; border:1px solid var(--card-border);">
+            <div>
+              <strong style="font-size:0.85rem;">${s.title}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${s.date}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-weight:700; color:var(--primary); font-size:0.9rem;">+€${s.amount}</span>
+              <button class="btn-action btn-delete" onclick="promptDelete(() => deleteSavings(${s.id}))"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>`;
+      });
+    }
+
+    function showAddSavingsModal() {
+      document.getElementById('sav-date').valueAsDate = new Date();
+      document.getElementById('savings-modal').style.display = 'flex';
+    }
+
+    document.getElementById('savings-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = document.getElementById('sav-title').value;
+      const amount = parseFloat(document.getElementById('sav-amount').value);
+      const date = document.getElementById('sav-date').value;
+
+      window.savings.push({ id: Date.now(), title, amount, date });
+      triggerSave();
+      closeModal('savings-modal');
+      renderSavings();
+    });
+
+    function deleteSavings(id) {
+      window.savings = window.savings.filter(s => s.id !== id);
+      triggerSave();
+      renderSavings();
+    }
+
+    function renderExpenses() {
+      const container = document.getElementById('expenses-list');
+      container.innerHTML = '';
+      const total = window.expenses.reduce((acc, e) => acc + e.amount, 0);
+      document.getElementById('stat-expenses-total').innerText = `€${total.toFixed(2)}`;
+
+      if (window.expenses.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem;">Nessuna spesa registrata.</p>`;
+        return;
+      }
+
+      window.expenses.forEach(e => {
+        container.innerHTML += `
+          <div class="expense-card" style="display:flex; justify-content:space-between; align-items:center; background:#faf8f5; padding:8px 12px; border-radius:8px; margin-bottom:8px; border:1px solid var(--card-border);">
+            <div>
+              <strong style="font-size:0.85rem;">${e.title}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${e.category} • ${e.date}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-weight:700; color:var(--danger); font-size:0.9rem;">-€${e.amount}</span>
+              <button class="btn-action btn-delete" onclick="promptDelete(() => deleteExpense(${e.id}))"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>`;
+      });
+    }
+
+    function showAddExpenseModal() {
+      document.getElementById('exp-date').valueAsDate = new Date();
+      document.getElementById('expense-modal').style.display = 'flex';
+    }
+
+    document.getElementById('expense-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = document.getElementById('exp-title').value;
+      const category = document.getElementById('exp-category').value;
+      const amount = parseFloat(document.getElementById('exp-amount').value);
+      const date = document.getElementById('exp-date').value;
+
+      window.expenses.push({ id: Date.now(), title, category, amount, date });
+      triggerSave();
+      closeModal('expense-modal');
+      renderExpenses();
+    });
+
+    function deleteExpense(id) {
+      window.expenses = window.expenses.filter(e => e.id !== id);
+      triggerSave();
+      renderExpenses();
+    }
+
+    function renderGoals() {
+      const container = document.getElementById('goals-list');
+      container.innerHTML = '';
+      if (window.goals.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem;">Nessun obiettivo di risparmio impostato.</p>`;
+        return;
+      }
+
+      window.goals.forEach(g => {
+        const pct = Math.min(Math.round((g.current / g.target) * 100), 100);
+        container.innerHTML += `
+          <div class="goal-card">
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
+              <span>${g.title}</span>
+              <span style="color:var(--primary)">€${g.current} / €${g.target} (${pct}%)</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width: ${pct}%"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+              <small style="color:var(--text-muted)">Mancano €${Math.max(g.target - g.current, 0)}</small>
+              <div style="display:flex; gap:6px;">
+                <button class="btn-action btn-edit" style="font-size:0.75rem;" onclick="updateGoalCurrent(${g.id})">Aggiorna</button>
+                <button class="btn-action btn-delete" style="font-size:0.75rem;" onclick="promptDelete(() => deleteGoal(${g.id}))"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          </div>`;
+      });
+    }
+
+    function showAddGoalModal() {
+      const title = prompt("Nome obiettivo (es. Vacanze):");
+      const target = parseFloat(prompt("Target in €:"));
+      if (title && target) {
+        window.goals.push({ id: Date.now(), title, target, current: 0 });
+        triggerSave();
+        renderGoals();
+      }
+    }
+
+    function updateGoalCurrent(id) {
+      const g = window.goals.find(x => x.id === id);
+      if (!g) return;
+      const newCurrent = parseFloat(prompt(`Inserisci la cifra attualmente risparmiata per "${g.title}":`, g.current));
+      if (!isNaN(newCurrent)) {
+        g.current = newCurrent;
+        triggerSave();
+        renderGoals();
+      }
+    }
+
+    function deleteGoal(id) {
+      window.goals = window.goals.filter(g => g.id !== id);
+      triggerSave();
+      renderGoals();
+    }
+
+    function promptDelete(callback) {
+      deleteCallback = callback;
+      document.getElementById('delete-modal').style.display = 'flex';
+    }
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+      if(modalId === 'delete-modal') deleteCallback = null;
+    }
+    function confirmDelete() {
+      if (deleteCallback) deleteCallback();
+      closeModal('delete-modal');
+    }
+
+    document.getElementById('pay-batch-date').valueAsDate = new Date();
+  </script>
+</body>
+</html>
